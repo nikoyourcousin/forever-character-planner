@@ -42,7 +42,3 @@ Drop a jpg, png, or webp into `public/wallpapers` and refresh. In development, a
 ## Data
 
 The roster is stored in `localStorage` under `fcp-roster-v1`. Clearing site data in the browser deletes the list. Export keeps a copy in a file.
-
-## GitHub Pages
-
-The live site is published from the Vite build, not from the repository root. Pushes to `master` run `.github/workflows/pages.yml`. In the repository settings, Pages must use **GitHub Actions** as the source. The site is served at `/forever-character-planner/`.
