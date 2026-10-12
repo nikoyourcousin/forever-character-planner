@@ -446,8 +446,8 @@ const dictionary = {
 } as const
 
 function readLocale(): Locale {
-  if (typeof localStorage === 'undefined') return 'ru'
-  return localStorage.getItem(LOCALE_KEY) === 'en' ? 'en' : 'ru'
+  if (typeof localStorage === 'undefined') return 'en'
+  return localStorage.getItem(LOCALE_KEY) === 'ru' ? 'ru' : 'en'
 }
 
 export const locale = ref<Locale>(readLocale())

@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import HoverTip from './HoverTip.vue'
 import IconButton from './IconButton.vue'
+import Dropdown from './Dropdown.vue'
 import { classesFor, getRules, racesFor, SERVER_IDS, specsFor, STATUS_IDS } from '../data'
 import { CLASS_ICON, FACTION_ICON, professionIcon, RACE_ICON } from '../icons'
 import { t } from '../i18n'
@@ -84,6 +85,19 @@ const rules = computed(() => getRules())
 const raceOptions = computed(() => racesFor(draft.faction))
 const classOptions = computed(() => classesFor(draft.race))
 const specOptions = computed(() => specsFor(draft.classId))
+const serverOptions = computed(() => [
+  { value: '', label: t('ui.serverNone') },
+  ...SERVER_IDS.map((id) => ({ value: id, label: t(`server.${id}`) })),
+])
+const statusOptions = computed(() => STATUS_IDS.map((status) => ({ value: status, label: t(`status.${status}`) })))
+
+function setServer(value: string) {
+  draft.server = (SERVER_IDS as readonly string[]).includes(value) ? (value as Server) : ''
+}
+
+function setStatus(value: string) {
+  draft.status = (STATUS_IDS as readonly string[]).includes(value) ? (value as Status) : 'idea'
+}
 
 function sanitize() {
   if (!raceOptions.value.some((entry) => entry.id === draft.race)) {
@@ -237,10 +251,13 @@ function onDialogClose() {
 
         <div class="line">
           <span>{{ t('ui.server') }}</span>
-          <select v-model="draft.server" data-testid="server-select">
-            <option value="">{{ t('ui.serverNone') }}</option>
-            <option v-for="id in SERVER_IDS" :key="id" :value="id">{{ t(`server.${id}`) }}</option>
-          </select>
+          <Dropdown
+            :model-value="draft.server"
+            :options="serverOptions"
+            :label="t('ui.server')"
+            testid="server-select"
+            @update:model-value="setServer"
+          />
         </div>
 
         <div class="line">
@@ -371,9 +388,13 @@ function onDialogClose() {
             </label>
             <label>
               <span>{{ t('ui.status') }}</span>
-              <select v-model="draft.status" data-testid="status-select">
-                <option v-for="status in STATUS_IDS" :key="status" :value="status">{{ t(`status.${status}`) }}</option>
-              </select>
+              <Dropdown
+                :model-value="draft.status"
+                :options="statusOptions"
+                :label="t('ui.status')"
+                testid="status-select"
+                @update:model-value="setStatus"
+              />
             </label>
             <label class="span-2">
               <span>{{ t('ui.notes') }}</span>

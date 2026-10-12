@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 import CharacterCard from './components/CharacterCard.vue'
 import CharacterDialog from './components/CharacterDialog.vue'
+import Dropdown from './components/Dropdown.vue'
 import HoverTip from './components/HoverTip.vue'
 import IconButton from './components/IconButton.vue'
 import WowIcon from './components/WowIcon.vue'
@@ -47,6 +48,11 @@ async function loadWallpapers() {
     wallpaperFiles.value = []
   }
 }
+
+const roleOptions = computed(() => [
+  { value: 'all', label: t('ui.anyRole') },
+  ...ALL_ROLES.map((role) => ({ value: role, label: t(`role.${role}`) })),
+])
 
 const filtersActive = computed(
   () => factionFilter.value !== 'all' || roleFilter.value !== 'all' || query.value.trim() !== '',
@@ -352,13 +358,7 @@ watchEffect(() => {
               @click="toggleFaction('horde')"
             />
           </div>
-          <label>
-            <span class="sr-only">{{ t('ui.roles') }}</span>
-            <select v-model="roleFilter" data-testid="role-filter">
-              <option value="all">{{ t('ui.anyRole') }}</option>
-              <option v-for="role in ALL_ROLES" :key="role" :value="role">{{ t(`role.${role}`) }}</option>
-            </select>
-          </label>
+          <Dropdown v-model="roleFilter" :label="t('ui.roles')" :options="roleOptions" testid="role-filter" />
           <HoverTip>
             <button
               type="button"
