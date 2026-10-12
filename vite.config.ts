@@ -42,6 +42,7 @@ function wallpaperCatalog(): Plugin {
   }
 }
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  base: command === 'build' ? '/forever-character-planner/' : '/',
   plugins: [vue(), wallpaperCatalog()],
-})
+}))

@@ -4,6 +4,10 @@ export function dayIndex(count: number, date = new Date()) {
   return ((day % count) + count) % count
 }
 
+export function publicUrl(file: string) {
+  return `${import.meta.env.BASE_URL}${file.replace(/^\//, '')}`
+}
+
 export function wallpaperSrc(file: string) {
-  return `/wallpapers/${encodeURIComponent(file)}`
+  return publicUrl(`wallpapers/${encodeURIComponent(file)}`)
 }

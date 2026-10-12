@@ -10,7 +10,7 @@ import { ALL_ROLES, getRules } from './data'
 import { locale, setLocale, t } from './i18n'
 import { CLASS_ICON, FACTION_ICON, professionIcon, RACE_ICON } from './icons'
 import { characterName, type Character, type Faction } from './types'
-import { dayIndex, wallpaperSrc } from './wallpapers'
+import { dayIndex, publicUrl, wallpaperSrc } from './wallpapers'
 
 const { characters, notice, dismissNotice, upsert, remove, duplicate, exportRoster, importText } = useRoster()
 const rules = getRules()
@@ -38,7 +38,7 @@ onMounted(() => {
 
 async function loadWallpapers() {
   try {
-    const response = await fetch('/wallpapers.json', { cache: 'no-store' })
+    const response = await fetch(publicUrl('wallpapers.json'), { cache: 'no-store' })
     if (!response.ok) return
     const data: unknown = await response.json()
     if (!Array.isArray(data)) return
@@ -223,7 +223,7 @@ watchEffect(() => {
     <div class="page">
       <header class="top">
         <div class="brand">
-          <img class="forever-logo" src="/forever-logo.png" alt="" />
+          <img class="forever-logo" :src="publicUrl('forever-logo.png')" alt="" />
           <div class="brand-text">
             <p class="eyebrow">{{ t('ui.eyebrow') }}</p>
             <h1>{{ t('ui.mark') }}</h1>
