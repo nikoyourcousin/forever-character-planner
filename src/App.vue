@@ -26,12 +26,10 @@ const importDraft = ref('')
 const importDialog = ref<HTMLDialogElement | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const wallpaperFiles = ref<string[]>([])
-const wallpaperShift = ref(0)
 const wallpaper = computed(() => {
   const files = wallpaperFiles.value
   if (!files.length) return ''
-  const index = (dayIndex(files.length) + wallpaperShift.value) % files.length
-  return wallpaperSrc(files[index] ?? '')
+  return wallpaperSrc(files[dayIndex(files.length)] ?? '')
 })
 
 onMounted(() => {
@@ -48,12 +46,6 @@ async function loadWallpapers() {
   } catch {
     wallpaperFiles.value = []
   }
-}
-
-async function nextWallpaper() {
-  await loadWallpapers()
-  if (wallpaperFiles.value.length < 2) return
-  wallpaperShift.value += 1
 }
 
 const filtersActive = computed(
@@ -242,7 +234,6 @@ watchEffect(() => {
             <button type="button" :aria-pressed="locale === 'ru'" data-testid="lang-ru" @click="setLocale('ru')">RU</button>
             <button type="button" :aria-pressed="locale === 'en'" data-testid="lang-en" @click="setLocale('en')">EN</button>
           </div>
-          <button type="button" class="text-btn" data-testid="next-wallpaper" @click="nextWallpaper">{{ t('ui.nextWallpaper') }}</button>
           <button type="button" class="text-btn" data-testid="export-roster" @click="exportRoster">{{ t('ui.export') }}</button>
           <button type="button" class="text-btn" data-testid="open-import" @click="dismissNotice(); importOpen = true">{{ t('ui.import') }}</button>
           <button type="button" class="primary" data-testid="new-character" @click="openCreate">{{ t('ui.newCharacter') }}</button>
