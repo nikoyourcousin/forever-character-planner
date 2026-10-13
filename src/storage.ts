@@ -1,4 +1,5 @@
 import { classesFor, getRules, SERVER_IDS, specsFor } from './data'
+import { normalizeLegacy } from './legacy'
 import type { Character, Faction, Server, Status } from './types'
 
 const KEY = 'fcp-roster-v1'
@@ -113,8 +114,8 @@ export function saveCharacters(characters: Character[]) {
   localStorage.setItem(KEY, JSON.stringify(characters))
 }
 
-export function serializeRoster(characters: Character[]): string {
-  return JSON.stringify({ version: 1, characters }, null, 2)
+export function serializeRoster(characters: Character[], legacy: string[]): string {
+  return JSON.stringify({ version: 1, characters, legacy }, null, 2)
 }
 
 export interface ImportReport {
@@ -122,6 +123,13 @@ export interface ImportReport {
   added: number
   updated: number
   skipped: number
+  legacy: string[] | null
+}
+
+function readLegacy(parsed: unknown): string[] | null {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
+  if (!Object.prototype.hasOwnProperty.call(parsed, 'legacy')) return null
+  return normalizeLegacy((parsed as { legacy: unknown }).legacy)
 }
 
 export function parseImport(raw: string, existing: Character[]): ImportReport | null {
@@ -156,5 +164,5 @@ export function parseImport(raw: string, existing: Character[]): ImportReport | 
       added += 1
     }
   }
-  return { characters: next, added, updated, skipped }
+  return { characters: next, added, updated, skipped, legacy: readLegacy(parsed) }
 }

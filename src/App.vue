@@ -5,16 +5,24 @@ import CharacterDialog from './components/CharacterDialog.vue'
 import Dropdown from './components/Dropdown.vue'
 import HoverTip from './components/HoverTip.vue'
 import IconButton from './components/IconButton.vue'
-import WowIcon from './components/WowIcon.vue'
+import LegacyBoard from './components/LegacyBoard.vue'
+import { useLegacy } from './composables/useLegacy'
 import { useRoster } from './composables/useRoster'
-import { ALL_ROLES, getRules } from './data'
+import { ALL_ROLES } from './data'
 import { locale, setLocale, t } from './i18n'
-import { CLASS_ICON, FACTION_ICON, professionIcon, RACE_ICON } from './icons'
+import { FACTION_ICON } from './icons'
+// Покрытие профессий снято с экрана, код ниже оставлен.
+// import WowIcon from './components/WowIcon.vue'
+// import { getRules } from './data'
+// import { CLASS_ICON, professionIcon, RACE_ICON } from './icons'
 import { characterName, type Character, type Faction } from './types'
 import { dayIndex, publicUrl, wallpaperSrc } from './wallpapers'
 
-const { characters, notice, dismissNotice, upsert, remove, duplicate, exportRoster, importText } = useRoster()
-const rules = getRules()
+const { characters, notice, importedLegacy, dismissNotice, upsert, remove, duplicate, exportRoster, importText } = useRoster()
+const { earned, toggle, replace } = useLegacy(() => {
+  notice.value = t('ui.storageFailed')
+})
+// const rules = getRules()
 
 const factionFilter = ref<'all' | Faction>('all')
 const roleFilter = ref('all')
@@ -70,6 +78,12 @@ function sortRoster(list: Character[]) {
   })
 }
 
+const legacyRoster = computed(() =>
+  factionFilter.value === 'all'
+    ? characters.value
+    : characters.value.filter((character) => character.faction === factionFilter.value),
+)
+
 const planned = computed(() =>
   sortRoster(
     characters.value.filter((character) => {
@@ -103,9 +117,10 @@ const visible = computed(() => {
   })
 })
 
-const living = computed(() => characters.value.filter((character) => character.status !== 'dead'))
-
 const hover = ref<{ id: string; field: 'primaries' | 'secondaries' } | null>(null)
+
+/*
+const living = computed(() => characters.value.filter((character) => character.status !== 'dead'))
 const factions = ['alliance', 'horde'] as const
 const professionRows = [
   { field: 'primaries' as const, ids: rules.primaryProfessions },
@@ -151,6 +166,7 @@ function professionPeople(id: string, field: 'primaries' | 'secondaries', factio
     ),
   )
 }
+*/
 
 function lacksHover(character: Character) {
   if (!hover.value) return false
@@ -191,6 +207,11 @@ function saveCharacter(character: Character) {
   editorOpen.value = false
 }
 
+function takeLegacy() {
+  const marks = importedLegacy.value
+  if (marks != null) replace(marks)
+}
+
 function syncImportDialog(open: boolean) {
   const element = importDialog.value
   if (!element) return
@@ -209,11 +230,15 @@ async function onImportFile(event: Event) {
   const file = input.files?.[0]
   input.value = ''
   if (!file) return
-  if (importText(await file.text())) closeImport()
+  if (importText(await file.text())) {
+    takeLegacy()
+    closeImport()
+  }
 }
 
 function applyImportDraft() {
   if (importText(importDraft.value)) {
+    takeLegacy()
     importDraft.value = ''
     closeImport()
   }
@@ -240,7 +265,7 @@ watchEffect(() => {
             <button type="button" :aria-pressed="locale === 'ru'" data-testid="lang-ru" @click="setLocale('ru')">RU</button>
             <button type="button" :aria-pressed="locale === 'en'" data-testid="lang-en" @click="setLocale('en')">EN</button>
           </div>
-          <button type="button" class="text-btn" data-testid="export-roster" @click="exportRoster">{{ t('ui.export') }}</button>
+          <button type="button" class="text-btn" data-testid="export-roster" @click="exportRoster(earned)">{{ t('ui.export') }}</button>
           <button type="button" class="text-btn" data-testid="open-import" @click="dismissNotice(); importOpen = true">{{ t('ui.import') }}</button>
           <button type="button" class="primary" data-testid="new-character" @click="openCreate">{{ t('ui.newCharacter') }}</button>
         </div>
@@ -251,6 +276,9 @@ watchEffect(() => {
         <button type="button" class="icon-button" :aria-label="t('ui.close')" @click="dismissNotice">×</button>
       </p>
 
+      <LegacyBoard :characters="legacyRoster" :earned="earned" @toggle="toggle" />
+
+      <!--
       <section class="board" :aria-label="t('ui.board')">
         <div
           v-for="row in professionRows"
@@ -332,6 +360,7 @@ watchEffect(() => {
           </span>
         </div>
       </section>
+      -->
 
       <section class="roster">
         <header class="roster-head">

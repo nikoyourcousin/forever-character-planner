@@ -6,6 +6,7 @@ import type { Character } from '../types'
 export function useRoster() {
   const characters = ref<Character[]>(loadCharacters())
   const notice = ref('')
+  const importedLegacy = ref<string[] | null>(null)
 
   watch(characters, (value) => {
     try {
@@ -48,12 +49,12 @@ export function useRoster() {
     })
   }
 
-  function exportRoster() {
-    if (!characters.value.length) {
+  function exportRoster(legacyIds: string[]) {
+    if (!characters.value.length && legacyIds.length === 0) {
       notice.value = t('ui.exportEmpty')
       return
     }
-    const blob = new Blob([serializeRoster(characters.value)], { type: 'application/json' })
+    const blob = new Blob([serializeRoster(characters.value, legacyIds)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
@@ -69,6 +70,7 @@ export function useRoster() {
       return false
     }
     characters.value = report.characters
+    importedLegacy.value = report.legacy
     notice.value = tf('ui.importResult', {
       added: report.added,
       updated: report.updated,
@@ -77,5 +79,5 @@ export function useRoster() {
     return true
   }
 
-  return { characters, notice, dismissNotice, upsert, remove, duplicate, exportRoster, importText }
+  return { characters, notice, importedLegacy, dismissNotice, upsert, remove, duplicate, exportRoster, importText }
 }
