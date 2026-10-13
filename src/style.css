@@ -343,7 +343,7 @@ h1 { font-size: 1.35rem; letter-spacing: 0.04em; }
 .grid { display: grid; }
 .card {
   display: grid;
-  grid-template-columns: minmax(220px, 1.5fr) minmax(88px, 0.6fr) 56px 28px;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(88px, 0.6fr) 56px auto;
   align-items: center;
   column-gap: 12px;
   padding: 6px 0;
@@ -355,6 +355,16 @@ h1 { font-size: 1.35rem; letter-spacing: 0.04em; }
 .card-id { display: flex; gap: 6px; align-items: center; min-width: 0; }
 .card-title { min-width: 0; }
 .card h2 { font-family: "Source Sans 3", sans-serif; font-size: 0.95rem; font-weight: 600; line-height: 1.15; }
+.card-name {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  line-height: inherit;
+  text-align: left;
+}
+.card-name:hover { color: var(--gold); }
 .card-icon, .card-icon img { width: 24px; height: 24px; display: block; }
 .card-title p, .notes, .footnote, .field-hint, .roles, .problem { color: var(--muted); font-size: 0.8rem; }
 .card-title p { white-space: nowrap; line-height: 1.15; }
@@ -365,6 +375,8 @@ h1 { font-size: 1.35rem; letter-spacing: 0.04em; }
 .card-prof.is-primary, .card-prof.is-primary img { width: 22px; height: 22px; }
 .server-tag { color: var(--gold); font-size: 0.78rem; }
 .notes { grid-column: 1 / -1; }
+.card-actions { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
+.card-actions .menu-toggle { min-height: 22px; padding: 0; }
 .menu { position: relative; justify-self: end; }
 .menu-toggle {
   width: 28px;
@@ -545,8 +557,37 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .legacy-piles { grid-template-columns: 1fr 1fr; }
 }
 
+.guide-page { display: grid; gap: 18px; }
+.guide-back { justify-self: start; padding-left: 0; }
+.guide-head { display: flex; gap: 8px; align-items: center; }
+.guide-head h2 { font-size: 1.2rem; }
+.guide-title {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.guide-block {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.guide-block h4 { margin: 0; font-size: 1rem; font-weight: 600; }
+.guide-prof-head { display: flex; align-items: center; gap: 8px; }
+.guide-prof, .guide-prof img { width: 22px; height: 22px; display: block; }
+.guide-spec { margin: 0; color: var(--gold); font-size: 0.88rem; }
+.guide-points { margin: 0; padding-left: 1.15rem; font-size: 0.9rem; }
+.guide-points li { margin: 4px 0; }
+.guide-route { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.guide-route li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; font-size: 0.9rem; }
+.guide-range { color: var(--gold); font-size: 0.8rem; }
+.guide-external { color: var(--muted); font-size: 0.78rem; }
+.guide-external:hover { color: var(--ink); }
+.guide-source { margin: 0; color: var(--muted); font-size: 0.75rem; }
+
 @media (max-width: 720px) {
-  .card { grid-template-columns: 1fr 28px; }
+  .card { grid-template-columns: 1fr auto; }
   .roles, .card-profs, .notes { grid-column: 1 / -1; }
   .name-pair, .line, .form-grid, .span-2 { grid-template-columns: 1fr; }
   .span-2 { grid-column: auto; }

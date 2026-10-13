@@ -12,6 +12,7 @@ const emit = defineEmits<{
   edit: []
   duplicate: []
   remove: []
+  guides: []
 }>()
 
 const confirming = ref(false)
@@ -50,7 +51,11 @@ function askRemove() {
         :style="{ boxShadow: `inset 0 -2px 0 ${CLASS_COLOR[character.classId] ?? '#e4c57a'}` }"
       />
       <div class="card-title">
-        <h2>{{ characterName(props.character) }}</h2>
+        <h2>
+          <button type="button" class="card-name" data-testid="open-guides" @click="emit('guides')">
+            {{ characterName(props.character) }}
+          </button>
+        </h2>
         <p>
           {{ t(`race.${character.race}`) }} · {{ t(`class.${character.classId}`) }} · {{ t(`spec.${character.spec}`) }}
           <template v-if="character.level"> · {{ t('ui.levelShort') }} {{ character.level }}</template>
@@ -81,7 +86,8 @@ function askRemove() {
         />
       </div>
     </div>
-    <div class="menu" :class="{ open: menuOpen }" @focusout="onFocusOut">
+    <div class="card-actions">
+      <div class="menu" :class="{ open: menuOpen }" @focusout="onFocusOut">
       <button
         type="button"
         class="menu-toggle"
@@ -98,6 +104,7 @@ function askRemove() {
           {{ confirming ? t('ui.confirmRemove') : t('ui.remove') }}
         </button>
       </div>
+    </div>
     </div>
     <p v-if="character.notes" class="notes">{{ character.notes }}</p>
   </article>

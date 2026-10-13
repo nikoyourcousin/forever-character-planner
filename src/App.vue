@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch, watchEffect } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch, watchEffect } from 'vue'
 import CharacterCard from './components/CharacterCard.vue'
 import CharacterDialog from './components/CharacterDialog.vue'
+import CharacterGuide from './components/CharacterGuide.vue'
 import Dropdown from './components/Dropdown.vue'
 import HoverTip from './components/HoverTip.vue'
 import IconButton from './components/IconButton.vue'
@@ -24,6 +25,32 @@ const { earned, toggle, replace } = useLegacy(() => {
 })
 // const rules = getRules()
 
+function readGuideId(): string | null {
+  const match = /^#\/character\/([^/]+)$/.exec(location.hash)
+  if (!match?.[1]) return null
+  try {
+    return decodeURIComponent(match[1])
+  } catch {
+    return null
+  }
+}
+
+const guideId = ref<string | null>(readGuideId())
+const guideOpen = computed(() => guideId.value != null)
+const guideCharacter = computed(() => characters.value.find((character) => character.id === guideId.value) ?? null)
+
+function syncGuide() {
+  guideId.value = readGuideId()
+}
+
+function openGuides(id: string) {
+  location.hash = `#/character/${encodeURIComponent(id)}`
+}
+
+function closeGuides() {
+  location.hash = ''
+}
+
 const factionFilter = ref<'all' | Faction>('all')
 const roleFilter = ref('all')
 const query = ref('')
@@ -42,7 +69,12 @@ const wallpaper = computed(() => {
 })
 
 onMounted(() => {
+  window.addEventListener('hashchange', syncGuide)
   void loadWallpapers()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('hashchange', syncGuide)
 })
 
 async function loadWallpapers() {
@@ -276,6 +308,9 @@ watchEffect(() => {
         <button type="button" class="icon-button" :aria-label="t('ui.close')" @click="dismissNotice">×</button>
       </p>
 
+      <CharacterGuide v-if="guideOpen" :character="guideCharacter" @back="closeGuides" />
+
+      <template v-else>
       <LegacyBoard :characters="legacyRoster" :earned="earned" @toggle="toggle" />
 
       <!--
@@ -413,12 +448,14 @@ watchEffect(() => {
             @edit="openEdit(character)"
             @duplicate="duplicate(character)"
             @remove="remove(character.id)"
+            @guides="openGuides(character.id)"
           />
         </div>
         <p v-else class="empty">{{ characters.length ? t('ui.emptyFiltered') : t('ui.emptyText') }}</p>
       </section>
 
       <footer class="footnote">{{ t('ui.footnote') }}</footer>
+      </template>
 
       <CharacterDialog
         :open="editorOpen"
