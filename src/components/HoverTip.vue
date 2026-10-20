@@ -10,6 +10,10 @@ const slots = useSlots()
 
 let scrollParent: HTMLElement | null = null
 
+function canHover() {
+  return window.matchMedia('(hover: hover) and (pointer: fine)').matches
+}
+
 function place() {
   const el = wrap.value
   const node = tip.value
@@ -37,7 +41,7 @@ function place() {
 }
 
 async function show() {
-  if (!slots.tip) return
+  if (!canHover() || !slots.tip) return
   const el = wrap.value
   if (!el) return
   const dialog = el.closest('dialog')
