@@ -619,10 +619,29 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .search { flex: 1 1 auto; width: 100%; }
   .toolbar .dropdown { width: 100%; }
   .faction-toggle { align-self: flex-start; }
-  .card { grid-template-columns: 1fr auto; row-gap: 4px; }
-  .roles, .card-profs, .notes { grid-column: 1 / -1; }
+  .card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "id actions"
+      "roles roles"
+      "profs profs"
+      "notes notes";
+    row-gap: 6px;
+    column-gap: 8px;
+    align-items: start;
+    padding: 10px 0;
+  }
+  .card-id { grid-area: id; }
+  .roles { grid-area: roles; }
+  .card-profs { grid-area: profs; }
+  .card-actions { grid-area: actions; align-self: start; }
+  .notes { grid-area: notes; }
   .card-title p { white-space: normal; }
-  .card-actions { align-self: start; }
+  .card-actions .menu-toggle {
+    width: 36px;
+    min-height: 36px;
+    height: 36px;
+  }
   .name-pair, .line, .form-grid, .span-2 { grid-template-columns: 1fr; }
   .span-2 { grid-column: auto; }
   .line > span { padding-top: 0; }
@@ -638,10 +657,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .guide-head h2 { overflow-wrap: anywhere; }
   .guide-head .card-title p { white-space: normal; }
   .guide-route li { grid-template-columns: 48px minmax(0, 1fr); gap: 8px; }
-  .text-btn, .lang button, .card-actions button, .primary, .icon-btn, .menu-toggle {
+  .text-btn, .lang button, .primary, .icon-btn {
     min-height: 40px;
   }
-  .menu-toggle { width: 40px; }
 }
 
 @media (max-width: 560px) {
