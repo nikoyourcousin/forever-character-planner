@@ -633,7 +633,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   }
   .card-id { grid-area: id; }
   .roles { grid-area: roles; }
-  .card-profs { grid-area: profs; }
+  .card-profs {
+    grid-area: profs;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+  }
+  .card-profs .prof-line { display: flex; align-items: center; gap: 3px; }
   .card-actions { grid-area: actions; align-self: start; }
   .notes { grid-area: notes; }
   .card-title p { white-space: normal; }
