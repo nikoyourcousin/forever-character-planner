@@ -564,41 +564,23 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   outline-offset: 2px;
 }
 
-.guide-page { display: grid; gap: 14px; }
-.guide-back {
-  justify-self: start;
-  padding-left: 0;
-  min-height: 40px;
-}
-.guide-panel {
-  display: grid;
-  gap: 12px;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  background: rgba(20, 28, 40, 0.72);
-}
-.guide-hero { padding: 16px; }
-.guide-head { display: flex; gap: 8px; align-items: center; min-width: 0; }
-.guide-head .card-title { min-width: 0; }
-.guide-head h2 { font-size: 1.2rem; overflow-wrap: anywhere; }
-.guide-head .card-title p { white-space: normal; }
+.guide-page { display: grid; gap: 18px; }
+.guide-back { justify-self: start; padding-left: 0; }
+.guide-head { display: flex; gap: 8px; align-items: center; }
+.guide-head h2 { font-size: 1.2rem; }
 .guide-title {
   margin: 0;
-  color: var(--gold);
-  font-family: Cinzel, Georgia, serif;
-  font-size: 0.92rem;
+  color: var(--muted);
+  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
 }
-.guide-cards { display: grid; gap: 10px; }
-.guide-card {
+.guide-block {
   display: grid;
   gap: 8px;
-  padding: 12px 14px;
-  border: 1px solid rgba(196, 168, 106, 0.16);
-  background: rgba(8, 12, 18, 0.35);
+  padding: 12px 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
-.guide-card h4 { margin: 0; font-size: 1rem; font-weight: 600; }
+.guide-block h4 { margin: 0; font-size: 1rem; font-weight: 600; }
 .guide-prof-head { display: flex; align-items: center; gap: 8px; }
 .guide-prof, .guide-prof img { width: 22px; height: 22px; display: block; }
 .guide-spec { margin: 0; color: var(--gold); font-size: 0.88rem; }
@@ -607,20 +589,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .guide-route { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .guide-route li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; font-size: 0.9rem; }
 .guide-range { color: var(--gold); font-size: 0.8rem; }
-.guide-external {
-  color: var(--muted);
-  font-size: 0.78rem;
-  word-break: break-word;
-}
+.guide-external { color: var(--muted); font-size: 0.78rem; }
 .guide-external:hover { color: var(--ink); }
-.guide-source { margin: 0; color: var(--muted); font-size: 0.75rem; padding: 0 2px; }
-
-@media (min-width: 760px) {
-  .guide-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
-}
+.guide-source { margin: 0; color: var(--muted); font-size: 0.75rem; }
 
 @media (max-width: 800px) {
   .legacy-columns { grid-template-columns: 1fr; }
@@ -663,6 +634,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     max-height: calc(100dvh - 16px);
   }
   .sheet form { max-height: calc(100dvh - 16px); }
+  .guide-head { min-width: 0; }
+  .guide-head h2 { overflow-wrap: anywhere; }
+  .guide-head .card-title p { white-space: normal; }
   .guide-route li { grid-template-columns: 48px minmax(0, 1fr); gap: 8px; }
   .text-btn, .lang button, .card-actions button, .primary, .icon-btn, .menu-toggle {
     min-height: 40px;
@@ -673,6 +647,4 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @media (max-width: 560px) {
   .legacy-piles { grid-template-columns: 1fr; }
   .top-actions .text-btn { padding: 0 6px; }
-  .guide-panel { padding: 12px; }
-  .guide-card { padding: 12px; }
 }
