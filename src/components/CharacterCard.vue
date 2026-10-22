@@ -64,6 +64,7 @@ function askRemove() {
     </div>
     <p class="roles">
       {{ character.roles.map((role) => t(`role.${role}`)).join(' · ') || '—' }}
+      <span v-if="character.account" class="account-tag">{{ t(`account.${character.account}`) }}</span>
       <span v-if="character.server" class="server-tag">{{ t(`server.${character.server}`) }}</span>
     </p>
     <div class="card-profs">

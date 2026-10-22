@@ -1,12 +1,13 @@
 import { ref, watch } from 'vue'
 import { t, tf } from '../i18n'
 import { loadCharacters, newId, parseImport, saveCharacters, serializeRoster } from '../storage'
-import type { Character } from '../types'
+import type { Character, PlanDay } from '../types'
 
 export function useRoster() {
   const characters = ref<Character[]>(loadCharacters())
   const notice = ref('')
   const importedLegacy = ref<string[] | null>(null)
+  const importedSchedule = ref<PlanDay[] | null>(null)
 
   watch(characters, (value) => {
     try {
@@ -49,12 +50,12 @@ export function useRoster() {
     })
   }
 
-  function exportRoster(legacyIds: string[]) {
-    if (!characters.value.length && legacyIds.length === 0) {
+  function exportRoster(legacyIds: string[], schedule: PlanDay[] = []) {
+    if (!characters.value.length && legacyIds.length === 0 && schedule.length === 0) {
       notice.value = t('ui.exportEmpty')
       return
     }
-    const blob = new Blob([serializeRoster(characters.value, legacyIds)], { type: 'application/json' })
+    const blob = new Blob([serializeRoster(characters.value, legacyIds, schedule)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
@@ -71,6 +72,7 @@ export function useRoster() {
     }
     characters.value = report.characters
     importedLegacy.value = report.legacy
+    importedSchedule.value = report.schedule
     notice.value = tf('ui.importResult', {
       added: report.added,
       updated: report.updated,
@@ -79,5 +81,23 @@ export function useRoster() {
     return true
   }
 
-  return { characters, notice, importedLegacy, dismissNotice, upsert, remove, duplicate, exportRoster, importText }
+  function takeSchedule() {
+    const marks = importedSchedule.value
+    importedSchedule.value = null
+    return marks
+  }
+
+  return {
+    characters,
+    notice,
+    importedLegacy,
+    importedSchedule,
+    dismissNotice,
+    upsert,
+    remove,
+    duplicate,
+    exportRoster,
+    importText,
+    takeSchedule,
+  }
 }

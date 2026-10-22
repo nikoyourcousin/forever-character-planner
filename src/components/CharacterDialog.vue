@@ -7,7 +7,7 @@ import { classesFor, getRules, racesFor, SERVER_IDS, specsFor, STATUS_IDS } from
 import { CLASS_ICON, FACTION_ICON, professionIcon, RACE_ICON } from '../icons'
 import { t } from '../i18n'
 import { newId } from '../storage'
-import type { Character, Faction, Server, Status } from '../types'
+import { ACCOUNT_IDS, type AccountId, type Character, type Faction, type Server, type Status } from '../types'
 
 const props = defineProps<{
   open: boolean
@@ -37,6 +37,7 @@ interface Draft {
   roles: string[]
   levelText: string
   server: Server | ''
+  account: AccountId | ''
   status: Status
   notes: string
 }
@@ -55,6 +56,7 @@ function emptyDraft(): Draft {
     roles: [],
     levelText: '',
     server: '',
+    account: '',
     status: 'idea',
     notes: '',
   }
@@ -74,6 +76,7 @@ function fromCharacter(character: Character): Draft {
     roles: [...character.roles],
     levelText: character.level == null ? '' : String(character.level),
     server: character.server,
+    account: character.account,
     status: character.status,
     notes: character.notes,
   }
@@ -89,10 +92,18 @@ const serverOptions = computed(() => [
   { value: '', label: t('ui.serverNone') },
   ...SERVER_IDS.map((id) => ({ value: id, label: t(`server.${id}`) })),
 ])
+const accountOptions = computed(() => [
+  { value: '', label: t('ui.accountNone') },
+  ...ACCOUNT_IDS.map((id) => ({ value: id, label: t(`account.${id}`) })),
+])
 const statusOptions = computed(() => STATUS_IDS.map((status) => ({ value: status, label: t(`status.${status}`) })))
 
 function setServer(value: string) {
   draft.server = (SERVER_IDS as readonly string[]).includes(value) ? (value as Server) : ''
+}
+
+function setAccount(value: string) {
+  draft.account = (ACCOUNT_IDS as readonly string[]).includes(value) ? (value as AccountId) : ''
 }
 
 function setStatus(value: string) {
@@ -190,6 +201,7 @@ function submit() {
     roles: [...draft.roles],
     level: level === 'invalid' ? null : level,
     server: draft.server,
+    account: draft.account,
     status: draft.status,
     notes: draft.notes.trim(),
     updatedAt: Date.now(),
@@ -257,6 +269,17 @@ function onDialogClose() {
             :label="t('ui.server')"
             testid="server-select"
             @update:model-value="setServer"
+          />
+        </div>
+
+        <div class="line">
+          <span>{{ t('ui.account') }}</span>
+          <Dropdown
+            :model-value="draft.account"
+            :options="accountOptions"
+            :label="t('ui.account')"
+            testid="account-select"
+            @update:model-value="setAccount"
           />
         </div>
 

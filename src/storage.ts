@@ -1,11 +1,17 @@
 import { classesFor, getRules, SERVER_IDS, specsFor } from './data'
 import { normalizeLegacy } from './legacy'
-import type { Character, Faction, Server, Status } from './types'
+import { normalizeSchedule } from './schedule'
+import { ACCOUNT_IDS, type AccountId, type Character, type Faction, type PlanDay, type Server, type Status } from './types'
 
 const KEY = 'fcp-roster-v1'
 const LEGACY_KEY = 'wow-roster-v1'
 const FACTIONS: Faction[] = ['alliance', 'horde']
 const STATUSES: Status[] = ['idea', 'leveling', 'active', 'parked', 'dead']
+
+function asAccount(source: Record<string, unknown>): AccountId | '' {
+  const raw = typeof source.account === 'string' ? source.account.trim().toLowerCase() : ''
+  return (ACCOUNT_IDS as readonly string[]).includes(raw) ? (raw as AccountId) : ''
+}
 
 export function newId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -63,6 +69,7 @@ export function normalizeCharacter(input: unknown): Character | null {
   }
   const id = typeof source.id === 'string' && source.id.trim() ? source.id : newId()
   const updatedAt = typeof source.updatedAt === 'number' ? source.updatedAt : Date.now()
+  const account = asAccount(source)
   return {
     id,
     name,
@@ -76,6 +83,7 @@ export function normalizeCharacter(input: unknown): Character | null {
     roles,
     level,
     server,
+    account,
     status: status as Status,
     notes,
     updatedAt,
@@ -114,8 +122,8 @@ export function saveCharacters(characters: Character[]) {
   localStorage.setItem(KEY, JSON.stringify(characters))
 }
 
-export function serializeRoster(characters: Character[], legacy: string[]): string {
-  return JSON.stringify({ version: 1, characters, legacy }, null, 2)
+export function serializeRoster(characters: Character[], legacy: string[], schedule: PlanDay[] = []): string {
+  return JSON.stringify({ version: 2, characters, legacy, schedule }, null, 2)
 }
 
 export interface ImportReport {
@@ -124,12 +132,19 @@ export interface ImportReport {
   updated: number
   skipped: number
   legacy: string[] | null
+  schedule: PlanDay[] | null
 }
 
 function readLegacy(parsed: unknown): string[] | null {
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
   if (!Object.prototype.hasOwnProperty.call(parsed, 'legacy')) return null
   return normalizeLegacy((parsed as { legacy: unknown }).legacy)
+}
+
+function readSchedule(parsed: unknown): PlanDay[] | null {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
+  if (!Object.prototype.hasOwnProperty.call(parsed, 'schedule')) return null
+  return normalizeSchedule((parsed as { schedule: unknown }).schedule)
 }
 
 export function parseImport(raw: string, existing: Character[]): ImportReport | null {
@@ -164,5 +179,12 @@ export function parseImport(raw: string, existing: Character[]): ImportReport | 
       added += 1
     }
   }
-  return { characters: next, added, updated, skipped, legacy: readLegacy(parsed) }
+  return {
+    characters: next,
+    added,
+    updated,
+    skipped,
+    legacy: readLegacy(parsed),
+    schedule: readSchedule(parsed),
+  }
 }

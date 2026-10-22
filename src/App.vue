@@ -7,8 +7,10 @@ import Dropdown from './components/Dropdown.vue'
 import HoverTip from './components/HoverTip.vue'
 import IconButton from './components/IconButton.vue'
 import LegacyBoard from './components/LegacyBoard.vue'
+import LevelingSchedule from './components/LevelingSchedule.vue'
 import { useLegacy } from './composables/useLegacy'
 import { useRoster } from './composables/useRoster'
+import { useSchedule } from './composables/useSchedule'
 import { ALL_ROLES } from './data'
 import { locale, setLocale, t } from './i18n'
 import { FACTION_ICON } from './icons'
@@ -16,31 +18,55 @@ import { FACTION_ICON } from './icons'
 // import WowIcon from './components/WowIcon.vue'
 // import { getRules } from './data'
 // import { CLASS_ICON, professionIcon, RACE_ICON } from './icons'
-import { characterName, type Character, type Faction } from './types'
+import { characterName, type Character, type Faction, type PlanDay, type PlanSession } from './types'
 import { dayIndex, publicUrl, wallpaperSrc } from './wallpapers'
 
-const { characters, notice, importedLegacy, dismissNotice, upsert, remove, duplicate, exportRoster, importText } = useRoster()
+const { characters, notice, importedLegacy, dismissNotice, upsert, remove, duplicate, exportRoster, importText, takeSchedule } =
+  useRoster()
 const { earned, toggle, replace } = useLegacy(() => {
+  notice.value = t('ui.storageFailed')
+})
+const {
+  days: scheduleDays,
+  replace: replaceSchedule,
+  addDay,
+  removeDay,
+  updateDay,
+  removeSession,
+  upsertSession,
+  detachCharacter,
+} = useSchedule(() => {
   notice.value = t('ui.storageFailed')
 })
 // const rules = getRules()
 
-function readGuideId(): string | null {
-  const match = /^#\/character\/([^/]+)$/.exec(location.hash)
-  if (!match?.[1]) return null
-  try {
-    return decodeURIComponent(match[1])
-  } catch {
-    return null
+type RouteView = { kind: 'home' } | { kind: 'guide'; id: string } | { kind: 'schedule' }
+
+function readRoute(): RouteView {
+  const hash = location.hash
+  if (hash === '#/schedule' || hash === '#/schedule/') return { kind: 'schedule' }
+  const match = /^#\/character\/([^/]+)$/.exec(hash)
+  if (match?.[1]) {
+    try {
+      return { kind: 'guide', id: decodeURIComponent(match[1]) }
+    } catch {
+      return { kind: 'home' }
+    }
   }
+  return { kind: 'home' }
 }
 
-const guideId = ref<string | null>(readGuideId())
-const guideOpen = computed(() => guideId.value != null)
-const guideCharacter = computed(() => characters.value.find((character) => character.id === guideId.value) ?? null)
+const route = ref<RouteView>(readRoute())
+const guideOpen = computed(() => route.value.kind === 'guide')
+const scheduleOpen = computed(() => route.value.kind === 'schedule')
+const guideCharacter = computed(() => {
+  const current = route.value
+  if (current.kind !== 'guide') return null
+  return characters.value.find((character) => character.id === current.id) ?? null
+})
 
-function syncGuide() {
-  guideId.value = readGuideId()
+function syncRoute() {
+  route.value = readRoute()
 }
 
 function openGuides(id: string) {
@@ -48,6 +74,14 @@ function openGuides(id: string) {
 }
 
 function closeGuides() {
+  location.hash = ''
+}
+
+function openSchedule() {
+  location.hash = '#/schedule'
+}
+
+function closeSchedule() {
   location.hash = ''
 }
 
@@ -69,12 +103,12 @@ const wallpaper = computed(() => {
 })
 
 onMounted(() => {
-  window.addEventListener('hashchange', syncGuide)
+  window.addEventListener('hashchange', syncRoute)
   void loadWallpapers()
 })
 
 onUnmounted(() => {
-  window.removeEventListener('hashchange', syncGuide)
+  window.removeEventListener('hashchange', syncRoute)
 })
 
 async function loadWallpapers() {
@@ -244,6 +278,28 @@ function takeLegacy() {
   if (marks != null) replace(marks)
 }
 
+function takeImportedSchedule() {
+  const marks = takeSchedule()
+  if (marks != null) replaceSchedule(marks)
+}
+
+function removeCharacter(id: string) {
+  detachCharacter(id)
+  remove(id)
+}
+
+function onUpdateDay(dayId: string, patch: Partial<Pick<PlanDay, 'note'>>) {
+  updateDay(dayId, patch)
+}
+
+function onUpsertSession(dayId: string, session: PlanSession) {
+  upsertSession(dayId, session)
+}
+
+function onRemoveSession(dayId: string, sessionId: string) {
+  removeSession(dayId, sessionId)
+}
+
 function syncImportDialog(open: boolean) {
   const element = importDialog.value
   if (!element) return
@@ -264,6 +320,7 @@ async function onImportFile(event: Event) {
   if (!file) return
   if (importText(await file.text())) {
     takeLegacy()
+    takeImportedSchedule()
     closeImport()
   }
 }
@@ -271,6 +328,7 @@ async function onImportFile(event: Event) {
 function applyImportDraft() {
   if (importText(importDraft.value)) {
     takeLegacy()
+    takeImportedSchedule()
     importDraft.value = ''
     closeImport()
   }
@@ -297,7 +355,8 @@ watchEffect(() => {
             <button type="button" :aria-pressed="locale === 'ru'" data-testid="lang-ru" @click="setLocale('ru')">RU</button>
             <button type="button" :aria-pressed="locale === 'en'" data-testid="lang-en" @click="setLocale('en')">EN</button>
           </div>
-          <button type="button" class="text-btn" data-testid="export-roster" @click="exportRoster(earned)">{{ t('ui.export') }}</button>
+          <button type="button" class="text-btn" data-testid="open-schedule" @click="openSchedule">{{ t('ui.schedule') }}</button>
+          <button type="button" class="text-btn" data-testid="export-roster" @click="exportRoster(earned, scheduleDays)">{{ t('ui.export') }}</button>
           <button type="button" class="text-btn" data-testid="open-import" @click="dismissNotice(); importOpen = true">{{ t('ui.import') }}</button>
           <button type="button" class="primary" data-testid="new-character" @click="openCreate">{{ t('ui.newCharacter') }}</button>
         </div>
@@ -309,6 +368,18 @@ watchEffect(() => {
       </p>
 
       <CharacterGuide v-if="guideOpen" :character="guideCharacter" @back="closeGuides" />
+
+      <LevelingSchedule
+        v-else-if="scheduleOpen"
+        :days="scheduleDays"
+        :characters="characters"
+        @back="closeSchedule"
+        @add-day="addDay"
+        @remove-day="removeDay"
+        @update-day="onUpdateDay"
+        @remove-session="onRemoveSession"
+        @upsert-session="onUpsertSession"
+      />
 
       <template v-else>
       <LegacyBoard :characters="legacyRoster" :earned="earned" @toggle="toggle" />
@@ -447,7 +518,7 @@ watchEffect(() => {
             :class="{ 'is-aside': lacksHover(character) }"
             @edit="openEdit(character)"
             @duplicate="duplicate(character)"
-            @remove="remove(character.id)"
+            @remove="removeCharacter(character.id)"
             @guides="openGuides(character.id)"
           />
         </div>

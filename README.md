@@ -10,9 +10,11 @@ The level cap is 60. Each character can learn two primary professions and every 
 - Race, class, and professions are picked from icons.
 - Roles: main, alt, raid, dungeons, PvP, professions, farm, bank, auction, leveling.
 - Server: PvE, PvP, RP, Hardcore.
+- Account label: WoW1 / WoW2 for multi-client leveling.
+- Leveling schedule (`#/schedule`): release days with WoW1/WoW2 sessions (character, target level, activity).
 - Profession coverage. When the roster has both factions, each icon is split: Alliance on the left, Horde on the right. With only one faction, a covered profession is shown in color and a missing one in gray.
 - Search, plus filters for faction and role.
-- Export and import the roster as `fcp-roster.json`.
+- Export and import the roster as `fcp-roster.json` (version 2 includes schedule).
 - The background changes once a day. Images live in `public/wallpapers`.
 
 ## Run
@@ -41,7 +43,7 @@ Drop a jpg, png, or webp into `public/wallpapers` and refresh. In development, a
 
 ## Data
 
-The roster is stored in `localStorage` under `fcp-roster-v1`. Clearing site data in the browser deletes the list. Export keeps a copy in a file.
+The roster is stored in `localStorage` under `fcp-roster-v1`, Legacy progress under `fcp-legacy-v1`, and the leveling schedule under `fcp-schedule-v1`. Clearing site data in the browser deletes them. Export keeps a copy in a file (`version: 2` with `characters`, `legacy`, and `schedule`).
 
 ## GitHub Pages
 
