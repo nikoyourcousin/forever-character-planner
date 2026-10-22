@@ -18,7 +18,7 @@ import { FACTION_ICON } from './icons'
 // import WowIcon from './components/WowIcon.vue'
 // import { getRules } from './data'
 // import { CLASS_ICON, professionIcon, RACE_ICON } from './icons'
-import { characterName, type Character, type Faction, type PlanDay, type PlanSession } from './types'
+import { characterName, type Character, type Faction, type PlanSession } from './types'
 import { dayIndex, publicUrl, wallpaperSrc } from './wallpapers'
 
 const { characters, notice, importedLegacy, dismissNotice, upsert, remove, duplicate, exportRoster, importText, takeSchedule } =
@@ -31,7 +31,6 @@ const {
   replace: replaceSchedule,
   addDay,
   removeDay,
-  updateDay,
   removeSession,
   upsertSession,
   detachCharacter,
@@ -288,10 +287,6 @@ function removeCharacter(id: string) {
   remove(id)
 }
 
-function onUpdateDay(dayId: string, patch: Partial<Pick<PlanDay, 'note'>>) {
-  updateDay(dayId, patch)
-}
-
 function onUpsertSession(dayId: string, session: PlanSession) {
   upsertSession(dayId, session)
 }
@@ -376,7 +371,6 @@ watchEffect(() => {
         @back="closeSchedule"
         @add-day="addDay"
         @remove-day="removeDay"
-        @update-day="onUpdateDay"
         @remove-session="onRemoveSession"
         @upsert-session="onUpsertSession"
       />

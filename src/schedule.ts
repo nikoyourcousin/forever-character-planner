@@ -81,7 +81,7 @@ export function emptyDay(day: number): PlanDay {
     id: newId(),
     day,
     note: '',
-    sessions: [emptySession('wow1'), emptySession('wow2')],
+    sessions: [],
   }
 }
 

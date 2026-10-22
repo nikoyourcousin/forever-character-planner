@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { getRules } from '../data'
-import { CLASS_ICON, RACE_ICON } from '../icons'
 import { t, tf } from '../i18n'
 import { emptySession } from '../schedule'
 import { ACCOUNT_IDS, characterName, type AccountId, type Character, type PlanDay, type PlanSession } from '../types'
 import Dropdown from './Dropdown.vue'
-import WowIcon from './WowIcon.vue'
 
 const props = defineProps<{
   days: PlanDay[]
@@ -17,7 +15,6 @@ const emit = defineEmits<{
   back: []
   addDay: []
   removeDay: [dayId: string]
-  updateDay: [dayId: string, patch: Partial<Pick<PlanDay, 'note'>>]
   removeSession: [dayId: string, sessionId: string]
   upsertSession: [dayId: string, session: PlanSession]
 }>()
@@ -39,6 +36,13 @@ function characterLabel(id: string | null) {
   if (character) return characterName(character)
   if (id) return t('schedule.missingCharacter')
   return t('schedule.noCharacter')
+}
+
+function sessionLine(session: PlanSession) {
+  const parts = [characterLabel(session.characterId)]
+  if (session.targetLevel != null) parts.push(tf('schedule.targetLevel', { level: session.targetLevel }))
+  if (session.activity.trim()) parts.push(session.activity.trim())
+  return parts.join(' · ')
 }
 
 const editorOpen = ref(false)
@@ -133,16 +137,12 @@ function removeEditingSession() {
 
 <template>
   <article class="schedule-page" data-testid="schedule-page">
-    <button type="button" class="text-btn guide-back" data-testid="schedule-back" @click="emit('back')">
-      {{ t('schedule.back') }}
-    </button>
-
     <header class="schedule-head">
-      <div>
-        <h2>{{ t('ui.schedule') }}</h2>
-        <p class="schedule-sub">{{ t('schedule.subtitle') }}</p>
-      </div>
-      <button type="button" class="primary" data-testid="add-day" @click="emit('addDay')">
+      <button type="button" class="text-btn guide-back" data-testid="schedule-back" @click="emit('back')">
+        {{ t('schedule.back') }}
+      </button>
+      <h2>{{ t('ui.schedule') }}</h2>
+      <button type="button" class="text-btn" data-testid="add-day" @click="emit('addDay')">
         {{ t('schedule.addDay') }}
       </button>
     </header>
@@ -153,70 +153,41 @@ function removeEditingSession() {
       <section v-for="day in sortedDays" :key="day.id" class="schedule-day" :data-testid="`schedule-day-${day.day}`">
         <header class="schedule-day-head">
           <h3>{{ tf('schedule.dayLabel', { day: day.day }) }}</h3>
-          <button type="button" class="text-btn danger-text" data-testid="remove-day" @click="emit('removeDay', day.id)">
-            {{ t('schedule.removeDay') }}
+          <button
+            type="button"
+            class="icon-button"
+            :aria-label="t('schedule.removeDay')"
+            data-testid="remove-day"
+            @click="emit('removeDay', day.id)"
+          >
+            ×
           </button>
         </header>
-
-        <label class="schedule-note">
-          <span class="sr-only">{{ t('schedule.dayNote') }}</span>
-          <input
-            :value="day.note"
-            type="text"
-            maxlength="500"
-            :placeholder="t('schedule.dayNotePlaceholder')"
-            @change="emit('updateDay', day.id, { note: ($event.target as HTMLInputElement).value.trim() })"
-          />
-        </label>
 
         <div class="schedule-columns">
           <div v-for="account in ACCOUNT_IDS" :key="account" class="schedule-column">
             <header class="schedule-column-head">
-              <strong>{{ t(`account.${account}`) }}</strong>
-              <button type="button" class="text-btn" @click="openNewSession(day.id, account)">
-                {{ t('schedule.addSession') }}
+              <span>{{ t(`account.${account}`) }}</span>
+              <button
+                type="button"
+                class="text-btn schedule-add"
+                :aria-label="t('schedule.addSession')"
+                @click="openNewSession(day.id, account)"
+              >
+                +
               </button>
             </header>
-
-            <p v-if="!sessionsFor(day, account).length" class="schedule-slot-empty">{{ t('schedule.noSessions') }}</p>
 
             <button
               v-for="session in sessionsFor(day, account)"
               :key="session.id"
               type="button"
               class="schedule-slot"
+              :class="{ 'is-empty': !session.characterId && session.targetLevel == null && !session.activity.trim() }"
               :data-testid="`session-${session.id}`"
               @click="openEditor(day.id, session)"
             >
-              <div v-if="findCharacter(session.characterId)" class="schedule-slot-id">
-                <WowIcon
-                  class="card-icon"
-                  :file="RACE_ICON[findCharacter(session.characterId)!.race] ?? ''"
-                  :label="t(`race.${findCharacter(session.characterId)!.race}`)"
-                />
-                <WowIcon
-                  class="card-icon"
-                  :file="CLASS_ICON[findCharacter(session.characterId)!.classId] ?? ''"
-                  :label="t(`class.${findCharacter(session.characterId)!.classId}`)"
-                />
-                <div class="card-title">
-                  <strong>{{ characterLabel(session.characterId) }}</strong>
-                  <span v-if="session.targetLevel != null">
-                    {{ tf('schedule.targetLevel', { level: session.targetLevel }) }}
-                  </span>
-                  <span v-else>{{ t('schedule.noTarget') }}</span>
-                </div>
-              </div>
-              <div v-else class="schedule-slot-id">
-                <div class="card-title">
-                  <strong>{{ characterLabel(session.characterId) }}</strong>
-                  <span v-if="session.targetLevel != null">
-                    {{ tf('schedule.targetLevel', { level: session.targetLevel }) }}
-                  </span>
-                  <span v-else>{{ t('schedule.noTarget') }}</span>
-                </div>
-              </div>
-              <p class="schedule-activity">{{ session.activity || t('schedule.noActivity') }}</p>
+              {{ sessionLine(session) }}
             </button>
           </div>
         </div>
@@ -226,7 +197,7 @@ function removeEditingSession() {
     <dialog ref="editorDialog" class="sheet" data-testid="session-dialog" @close="closeEditor">
       <form @submit.prevent="saveEditor">
         <header class="sheet-head">
-          <h2>{{ t('schedule.editSession') }} · {{ t(`account.${draft.account}`) }}</h2>
+          <h2>{{ t(`account.${draft.account}`) }}</h2>
           <button type="button" class="icon-button" :aria-label="t('ui.close')" @click="closeEditor">×</button>
         </header>
         <div class="sheet-body">
@@ -254,7 +225,7 @@ function removeEditingSession() {
             <textarea
               v-model="draft.activity"
               maxlength="500"
-              rows="3"
+              rows="2"
               :placeholder="t('schedule.activityPlaceholder')"
               data-testid="session-activity"
             />
