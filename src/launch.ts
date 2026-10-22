@@ -1,5 +1,5 @@
-/** Forever release — 4 November 2026, 00:00 Moscow time. */
-export const FOREVER_LAUNCH_AT = new Date('2026-11-04T00:00:00+03:00')
+/** Forever release — 4 November 2026, 15:00 Pacific / 23:00 UTC. */
+export const FOREVER_LAUNCH_AT = new Date('2026-11-04T23:00:00.000Z')
 
 export interface CountdownParts {
   live: boolean

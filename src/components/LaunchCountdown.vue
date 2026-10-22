@@ -26,9 +26,12 @@ onUnmounted(() => {
     :class="{ 'is-live': parts.live }"
     role="status"
     data-testid="launch-countdown"
-    :aria-label="parts.live ? t('ui.live') : t('ui.countdown')"
+    :title="parts.live ? t('ui.live') : t('ui.countdown')"
   >
-    <span v-if="!parts.live" class="launch-countdown-label">{{ t('ui.countdown') }}</span>
-    <strong>{{ label }}</strong>
+    <template v-if="parts.live">{{ t('ui.live') }}</template>
+    <template v-else>
+      <span class="launch-countdown-label">{{ t('ui.countdown') }}</span>
+      <strong>{{ label }}</strong>
+    </template>
   </p>
 </template>

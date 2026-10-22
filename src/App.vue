@@ -346,8 +346,8 @@ watchEffect(() => {
             <h1>{{ t('ui.mark') }}</h1>
           </div>
         </div>
-        <LaunchCountdown />
         <div class="top-actions">
+          <LaunchCountdown />
           <div class="lang" role="group" :aria-label="t('ui.title')">
             <button type="button" :aria-pressed="locale === 'ru'" data-testid="lang-ru" @click="setLocale('ru')">RU</button>
             <button type="button" :aria-pressed="locale === 'en'" data-testid="lang-en" @click="setLocale('en')">EN</button>

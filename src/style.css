@@ -80,42 +80,39 @@ img { max-width: 100%; }
   gap: 8px;
 }
 
-.top {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-.brand { display: flex; flex-direction: row; align-items: center; gap: 12px; }
+.top { justify-content: space-between; margin-bottom: 18px; flex-wrap: nowrap; }
+.brand { display: flex; flex-direction: row; align-items: center; gap: 12px; min-width: 0; }
 .brand-text { display: flex; flex-direction: column; gap: 2px; }
-.top-actions { justify-self: end; }
+.top-actions { flex-wrap: nowrap; }
 .launch-countdown {
   margin: 0;
-  justify-self: center;
-  text-align: center;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
   color: var(--gold);
   font-family: Cinzel, serif;
-  line-height: 1.2;
+  white-space: nowrap;
+  line-height: 1;
 }
 .launch-countdown-label {
-  display: block;
   color: var(--muted);
   font-family: 'Source Sans 3', sans-serif;
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .launch-countdown strong {
-  font-size: 1rem;
+  font-size: 0.92rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   font-variant-numeric: tabular-nums;
 }
-.launch-countdown.is-live strong {
+.launch-countdown.is-live {
   color: var(--sky);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  font-size: 0.92rem;
+  font-weight: 600;
 }
 .forever-logo { height: 52px; width: auto; display: block; }
 .eyebrow {
@@ -717,14 +714,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @media (max-width: 720px) {
   .page { width: min(1040px, calc(100% - 20px)); padding: 14px 0 36px; }
   .top {
-    grid-template-columns: 1fr;
-    justify-items: stretch;
-    gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 12px;
   }
-  .launch-countdown { justify-self: start; text-align: left; }
   .top-actions {
     width: 100%;
-    justify-self: stretch;
+    flex-wrap: wrap;
     justify-content: flex-start;
   }
   .top-actions .primary { margin-left: auto; }
