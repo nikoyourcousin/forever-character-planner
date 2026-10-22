@@ -80,9 +80,43 @@ img { max-width: 100%; }
   gap: 8px;
 }
 
-.top { justify-content: space-between; margin-bottom: 18px; }
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
 .brand { display: flex; flex-direction: row; align-items: center; gap: 12px; }
 .brand-text { display: flex; flex-direction: column; gap: 2px; }
+.top-actions { justify-self: end; }
+.launch-countdown {
+  margin: 0;
+  justify-self: center;
+  text-align: center;
+  color: var(--gold);
+  font-family: Cinzel, serif;
+  line-height: 1.2;
+}
+.launch-countdown-label {
+  display: block;
+  color: var(--muted);
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.launch-countdown strong {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.launch-countdown.is-live strong {
+  color: var(--sky);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
 .forever-logo { height: 52px; width: auto; display: block; }
 .eyebrow {
   color: var(--sky);
@@ -646,18 +680,32 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 .schedule-add { min-width: 1.5rem; padding: 0; font-size: 1rem; line-height: 1; }
 .schedule-slot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   width: 100%;
   text-align: left;
-  padding: 5px 0;
+  padding: 6px 0;
   border: 0;
   background: transparent;
   color: var(--ink);
   font-size: 0.9rem;
-  line-height: 1.35;
+  line-height: 1.3;
   cursor: pointer;
 }
 .schedule-slot.is-empty { color: var(--muted); }
 .schedule-slot:hover { color: var(--gold); }
+.schedule-face, .schedule-face img { width: 22px; height: 22px; display: block; flex: 0 0 auto; }
+.schedule-slot-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  min-width: 0;
+}
+.schedule-slot-text strong { font-weight: 600; }
+.schedule-activity { color: var(--muted); font-size: 0.85rem; }
+.schedule-slot:hover .schedule-activity { color: inherit; }
 .danger-text { color: var(--danger); }
 
 @media (max-width: 800px) {
@@ -669,12 +717,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @media (max-width: 720px) {
   .page { width: min(1040px, calc(100% - 20px)); padding: 14px 0 36px; }
   .top {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+    gap: 10px;
   }
+  .launch-countdown { justify-self: start; text-align: left; }
   .top-actions {
     width: 100%;
+    justify-self: stretch;
     justify-content: flex-start;
   }
   .top-actions .primary { margin-left: auto; }

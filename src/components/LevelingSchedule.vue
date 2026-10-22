@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { getRules } from '../data'
+import { CLASS_ICON, RACE_ICON } from '../icons'
 import { t, tf } from '../i18n'
 import { emptySession } from '../schedule'
 import { ACCOUNT_IDS, characterName, type AccountId, type Character, type PlanDay, type PlanSession } from '../types'
 import Dropdown from './Dropdown.vue'
+import WowIcon from './WowIcon.vue'
 
 const props = defineProps<{
   days: PlanDay[]
@@ -22,27 +24,29 @@ const emit = defineEmits<{
 const levelCap = computed(() => getRules().levelCap)
 const sortedDays = computed(() => [...props.days].sort((a, b) => a.day - b.day))
 
-function sessionsFor(day: PlanDay, account: AccountId) {
-  return day.sessions.filter((session) => session.account === account)
-}
-
 function findCharacter(id: string | null) {
   if (!id) return null
   return props.characters.find((character) => character.id === id) ?? null
 }
 
-function characterLabel(id: string | null) {
-  const character = findCharacter(id)
+function characterLabel(id: string | null, character: Character | null = findCharacter(id)) {
   if (character) return characterName(character)
   if (id) return t('schedule.missingCharacter')
   return t('schedule.noCharacter')
 }
 
-function sessionLine(session: PlanSession) {
-  const parts = [characterLabel(session.characterId)]
-  if (session.targetLevel != null) parts.push(tf('schedule.targetLevel', { level: session.targetLevel }))
-  if (session.activity.trim()) parts.push(session.activity.trim())
-  return parts.join(' · ')
+function slotsFor(day: PlanDay, account: AccountId) {
+  return day.sessions
+    .filter((session) => session.account === account)
+    .map((session) => {
+      const character = findCharacter(session.characterId)
+      return {
+        session,
+        character,
+        label: characterLabel(session.characterId, character),
+        empty: !session.characterId && session.targetLevel == null && !session.activity.trim(),
+      }
+    })
 }
 
 const editorOpen = ref(false)
@@ -179,15 +183,35 @@ function removeEditingSession() {
             </header>
 
             <button
-              v-for="session in sessionsFor(day, account)"
-              :key="session.id"
+              v-for="slot in slotsFor(day, account)"
+              :key="slot.session.id"
               type="button"
               class="schedule-slot"
-              :class="{ 'is-empty': !session.characterId && session.targetLevel == null && !session.activity.trim() }"
-              :data-testid="`session-${session.id}`"
-              @click="openEditor(day.id, session)"
+              :class="{ 'is-empty': slot.empty }"
+              :data-testid="`session-${slot.session.id}`"
+              @click="openEditor(day.id, slot.session)"
             >
-              {{ sessionLine(session) }}
+              <template v-if="slot.character">
+                <WowIcon
+                  class="schedule-face"
+                  :file="RACE_ICON[slot.character.race] ?? ''"
+                  :label="t(`race.${slot.character.race}`)"
+                />
+                <WowIcon
+                  class="schedule-face"
+                  :file="CLASS_ICON[slot.character.classId] ?? ''"
+                  :label="t(`class.${slot.character.classId}`)"
+                />
+              </template>
+              <span class="schedule-slot-text">
+                <strong>{{ slot.label }}</strong>
+                <span v-if="slot.session.targetLevel != null">
+                  {{ tf('schedule.targetLevel', { level: slot.session.targetLevel }) }}
+                </span>
+                <span v-if="slot.session.activity.trim()" class="schedule-activity">
+                  {{ slot.session.activity.trim() }}
+                </span>
+              </span>
             </button>
           </div>
         </div>

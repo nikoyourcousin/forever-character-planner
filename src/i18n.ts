@@ -88,6 +88,8 @@ const dictionary = {
       schedule: 'Расписание',
       account: 'Аккаунт',
       accountNone: 'Не указан',
+      countdown: 'До старта',
+      live: 'Live',
       footnote:
         'Только World of Warcraft: Forever. Расы и классы по бете 1.60.1, запуск 4 ноября 2026. Список хранится в этом браузере.',
     },
@@ -436,6 +438,8 @@ const dictionary = {
       schedule: 'Schedule',
       account: 'Account',
       accountNone: 'Not set',
+      countdown: 'Launch in',
+      live: 'Live',
       footnote:
         'World of Warcraft: Forever only. Races and classes follow beta 1.60.1, launching 4 November 2026. The list stays in this browser.',
     },

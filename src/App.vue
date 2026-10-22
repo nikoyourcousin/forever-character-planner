@@ -6,6 +6,7 @@ import CharacterGuide from './components/CharacterGuide.vue'
 import Dropdown from './components/Dropdown.vue'
 import HoverTip from './components/HoverTip.vue'
 import IconButton from './components/IconButton.vue'
+import LaunchCountdown from './components/LaunchCountdown.vue'
 import LegacyBoard from './components/LegacyBoard.vue'
 import LevelingSchedule from './components/LevelingSchedule.vue'
 import { useLegacy } from './composables/useLegacy'
@@ -345,6 +346,7 @@ watchEffect(() => {
             <h1>{{ t('ui.mark') }}</h1>
           </div>
         </div>
+        <LaunchCountdown />
         <div class="top-actions">
           <div class="lang" role="group" :aria-label="t('ui.title')">
             <button type="button" :aria-pressed="locale === 'ru'" data-testid="lang-ru" @click="setLocale('ru')">RU</button>
